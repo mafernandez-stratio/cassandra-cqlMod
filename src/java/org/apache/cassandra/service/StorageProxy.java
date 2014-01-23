@@ -1488,6 +1488,9 @@ public class StorageProxy implements StorageProxyMBean
     public static List<Row> getRangeSlice(AbstractRangeCommand command, ConsistencyLevel consistency_level)
     throws UnavailableException, ReadTimeoutException
     {
+
+        logger.info(">>> STRATIO >>> StorageProxy.getRangeSlice(...)");
+
         Tracing.trace("Determining replicas to query");
         long startTime = System.nanoTime();
 
