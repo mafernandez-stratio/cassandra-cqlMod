@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
+import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,21 +45,23 @@ public class CreateIndexStatement extends SchemaAlteringStatement
     private static final Logger logger = LoggerFactory.getLogger(CreateIndexStatement.class);
 
     private final String indexName;
-    private final IndexTarget target;
+    List<IndexTarget> columnNames;
     private final IndexPropDefs properties;
     private final boolean ifNotExists;
+    IndexTarget target;
 
     public CreateIndexStatement(CFName name,
                                 String indexName,
-                                IndexTarget target,
+                                List<IndexTarget> columnNames,
                                 IndexPropDefs properties,
                                 boolean ifNotExists)
     {
         super(name);
         this.indexName = indexName;
-        this.target = target;
+        this.columnNames = columnNames;
         this.properties = properties;
         this.ifNotExists = ifNotExists;
+        this.target = columnNames.iterator().next();
     }
 
     public void checkAccess(ClientState state) throws UnauthorizedException, InvalidRequestException
@@ -67,7 +70,7 @@ public class CreateIndexStatement extends SchemaAlteringStatement
     }
 
     public void validate(ClientState state) throws RequestValidationException
-    {
+    {                        
         CFMetaData cfm = ThriftValidation.validateColumnFamily(keyspace(), columnFamily());
         if (cfm.isCounter())
             throw new InvalidRequestException("Secondary indexes are not supported on counter tables");
