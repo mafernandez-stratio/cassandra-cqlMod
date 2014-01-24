@@ -549,11 +549,13 @@ typeColumns[CreateTypeStatement expr]
 createIndexStatement returns [CreateIndexStatement expr]
     @init {
         IndexPropDefs props = new IndexPropDefs();
+        props.isMultivalued = false;
         List<IndexTarget> columnNames  = new ArrayList<IndexTarget>();
         boolean ifNotExists = false;
     }
     : K_CREATE (K_CUSTOM { props.isCustom = true; })? K_INDEX (K_IF K_NOT K_EXISTS { ifNotExists = true; } )?
-        (idxName=IDENT)? K_ON cf=columnFamilyName '(' c1=indexIdent { columnNames.add(c1); }  ( ',' cn=indexIdent { columnNames.add(cn); } )* ')'
+        (idxName=IDENT)? K_ON cf=columnFamilyName 
+        '(' c1=indexIdent { columnNames.add(c1); }  ( ',' cn=indexIdent { columnNames.add(cn); props.isMultivalued = true; } )* ')'
         (K_USING cls=STRING_LITERAL { props.customClass = $cls.text; })?
         (K_WITH properties[props])?
       { $expr = new CreateIndexStatement(cf, $idxName.text, columnNames, props, ifNotExists); }

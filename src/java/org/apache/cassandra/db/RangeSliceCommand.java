@@ -27,6 +27,7 @@ import com.google.common.base.Objects;
 
 import org.apache.cassandra.config.CFMetaData;
 import org.apache.cassandra.config.Schema;
+import org.apache.cassandra.cql3.statements.SelectStatement;
 import org.apache.cassandra.db.filter.ExtendedFilter;
 import org.apache.cassandra.db.filter.IDiskAtomFilter;
 import org.apache.cassandra.dht.AbstractBounds;
@@ -35,6 +36,8 @@ import org.apache.cassandra.net.MessageOut;
 import org.apache.cassandra.net.MessagingService;
 import org.apache.cassandra.service.pager.Pageable;
 import org.apache.cassandra.utils.ByteBufferUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class RangeSliceCommand extends AbstractRangeCommand implements Pageable
 {
@@ -44,6 +47,8 @@ public class RangeSliceCommand extends AbstractRangeCommand implements Pageable
     public final boolean countCQL3Rows;
     public final boolean isPaging;
 
+    private static final Logger logger = LoggerFactory.getLogger(RangeSliceCommand.class);    
+    
     public RangeSliceCommand(String keyspace,
                              String columnFamily,
                              long timestamp,
@@ -79,6 +84,9 @@ public class RangeSliceCommand extends AbstractRangeCommand implements Pageable
         this.maxResults = maxResults;
         this.countCQL3Rows = countCQL3Rows;
         this.isPaging = isPaging;
+        
+        logger.info(">>> STRATIO >>> RangeSliceCommand constructor 9");
+        
     }
 
     public MessageOut<RangeSliceCommand> createMessage()
@@ -124,6 +132,9 @@ public class RangeSliceCommand extends AbstractRangeCommand implements Pageable
 
     public List<Row> executeLocally()
     {
+        
+        logger.info(">>> STRATIO >>> RangeSliceCommand.executeLocally()");
+        
         ColumnFamilyStore cfs = Keyspace.open(keyspace).getColumnFamilyStore(columnFamily);
 
         ExtendedFilter exFilter = cfs.makeExtendedFilter(keyRange, predicate, rowFilter, maxResults, countCQL3Rows, isPaging, timestamp);

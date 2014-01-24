@@ -1701,12 +1701,18 @@ public class ColumnFamilyStore implements ColumnFamilyStoreMBean
 
     public List<Row> search(ExtendedFilter filter)
     {
+        
+        logger.info(">>> STRATIO >>> ColumnFamilyStore.(...)");
+        
         Tracing.trace("Executing indexed scan for {}", filter.dataRange.keyRange().getString(metadata.getKeyValidator()));
         return indexManager.search(filter);
     }
 
     public List<Row> filter(AbstractScanIterator rowIterator, ExtendedFilter filter)
     {
+        
+        logger.info(">>> STRATIO >>> ColumnFamilyStore.filter(...)");
+        
         logger.trace("Filtering {} for rows matching {}", rowIterator, filter);
         List<Row> rows = new ArrayList<Row>();
         int columnsCount = 0;

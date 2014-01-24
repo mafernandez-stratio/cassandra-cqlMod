@@ -48,6 +48,8 @@ import org.apache.cassandra.thrift.ThriftValidation;
 import org.apache.cassandra.serializers.MarshalException;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.FBUtilities;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Encapsulates a completely parsed SELECT query, including the target
@@ -84,6 +86,8 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
     // Used by forSelection below
     private static final Parameters defaultParameters = new Parameters(Collections.<ColumnIdentifier, Boolean>emptyMap(), false, false, null, false);
 
+    private static final Logger logger = LoggerFactory.getLogger(SelectStatement.class);
+    
     public SelectStatement(CFMetaData cfm, int boundTerms, Parameters parameters, Selection selection, Term limit)
     {
         this.cfm = cfm;
@@ -93,6 +97,7 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
         this.columnRestrictions = new Restriction[cfm.clusteringColumns().size()];
         this.parameters = parameters;
         this.limit = limit;
+        logger.info(">>> STRATIO >>> SelectStatement constructor");
     }
 
     // Creates a simple select based on the given selection.
@@ -132,6 +137,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     public ResultMessage.Rows execute(QueryState state, QueryOptions options) throws RequestExecutionException, RequestValidationException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.execute(...2)");
+        
         ConsistencyLevel cl = options.getConsistency();
         List<ByteBuffer> variables = options.getValues();
         if (cl == null)
@@ -178,6 +186,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     private ResultMessage.Rows execute(Pageable command, ConsistencyLevel cl, List<ByteBuffer> variables, int limit, long now) throws RequestValidationException, RequestExecutionException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.execute(...5)");
+        
         List<Row> rows;
         if (command == null)
         {
@@ -195,6 +206,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     private ResultMessage.Rows pageCountQuery(QueryPager pager, List<ByteBuffer> variables, int pageSize, long now) throws RequestValidationException, RequestExecutionException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.pageCountQuery(...)");
+        
         int count = 0;
         while (!pager.isExhausted())
         {
@@ -209,6 +223,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     public ResultMessage.Rows processResults(List<Row> rows, List<ByteBuffer> variables, int limit, long now) throws RequestValidationException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.processResults(...)");
+        
         // Even for count, we need to process the result as it'll group some column together in sparse column families
         ResultSet rset = process(rows, variables, limit, now);
         rset = parameters.isCount ? rset.makeCountResult(parameters.countAlias) : rset;
@@ -226,6 +243,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     public ResultMessage.Rows executeInternal(QueryState state) throws RequestExecutionException, RequestValidationException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.executeInternal(...)");
+        
         List<ByteBuffer> variables = Collections.emptyList();
         int limit = getLimit(variables);
         long now = System.currentTimeMillis();
@@ -246,6 +266,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     public ResultSet process(List<Row> rows) throws InvalidRequestException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.process(...1)");
+        
         assert !parameters.isCount; // not yet needed
         return process(rows, Collections.<ByteBuffer>emptyList(), getLimit(Collections.<ByteBuffer>emptyList()), System.currentTimeMillis());
     }
@@ -262,6 +285,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     private List<ReadCommand> getSliceCommands(List<ByteBuffer> variables, int limit, long now) throws RequestValidationException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.getSliceCommands(...)");
+        
         Collection<ByteBuffer> keys = getKeys(variables);
         if (keys.isEmpty()) // in case of IN () for (the last column of) the partition key.
             return null;
@@ -288,6 +314,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     private RangeSliceCommand getRangeCommand(List<ByteBuffer> variables, int limit, long now) throws RequestValidationException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.getRangeCommand(...)");
+        
         IDiskAtomFilter filter = makeFilter(variables, limit);
         if (filter == null)
             return null;
@@ -839,6 +868,9 @@ public class SelectStatement implements CQLStatement, MeasurableForPreparedCache
 
     private ResultSet process(List<Row> rows, List<ByteBuffer> variables, int limit, long now) throws InvalidRequestException
     {
+        
+        logger.info(">>> STRATIO >>> SelectStatement.process(...)");
+        
         Selection.ResultSetBuilder result = selection.resultSetBuilder(now);
         for (org.apache.cassandra.db.Row row : rows)
         {

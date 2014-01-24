@@ -52,6 +52,9 @@ import platform
 import warnings
 import csv
 
+os.environ["CASSANDRA_HOME"] = os.getcwd()
+
+print os.environ["CASSANDRA_HOME"]
 
 readline = None
 try:

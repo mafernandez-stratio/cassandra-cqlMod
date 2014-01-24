@@ -31,6 +31,7 @@ public class IndexPropDefs extends PropertyDefinitions
 
     public boolean isCustom;
     public String customClass;
+    public boolean isMultivalued;
 
     static
     {
@@ -53,6 +54,9 @@ public class IndexPropDefs extends PropertyDefinitions
         if (getRawOptions().containsKey(SecondaryIndex.CUSTOM_INDEX_OPTION_NAME))
             throw new InvalidRequestException(String.format("Cannot specify %s as a CUSTOM option",
                                                             SecondaryIndex.CUSTOM_INDEX_OPTION_NAME));
+        
+        if(!isCustom && isMultivalued)
+            throw new InvalidRequestException("Cannot specify a multivalued index for a non-CUSTOM index");
     }
 
     public Map<String, String> getRawOptions() throws SyntaxException
